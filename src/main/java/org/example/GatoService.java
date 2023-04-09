@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class GatoService {
@@ -50,7 +51,7 @@ public class GatoService {
                           "1.- Ver otra imagen\n"+
                           "2.- Favorito\n"+
                           "3.- Volver \n";
-            String botones [] = {"Ver otra imagen", "Favorito", "Volver"};
+            String botones [] = {"Ver otra imagen", "Favorito","Ver favoritos" ,"Volver"};
             String idGato = gatitos.getId();
             String opcion = (String) JOptionPane.showInputDialog(null, menu, idGato, JOptionPane.INFORMATION_MESSAGE, gatoFoto,botones,botones[0]);
             int seleccion = -1;
@@ -65,6 +66,9 @@ public class GatoService {
                     break;
                 case 1:
                     favoritoGato(gatitos);
+                    break;
+                case 2:
+                    verFavoritos(gatitos);
                     break;
                 default:
                     break;
@@ -87,7 +91,6 @@ public class GatoService {
                     .addHeader("x-api-key", gato.getApikey())
                     .build();
             Response response = client.newCall(request).execute();
-            verFavoritos(gato);
         }catch(Exception e){
             System.out.println(e);
         }
@@ -97,15 +100,54 @@ public class GatoService {
         try{
             OkHttpClient client = new OkHttpClient().newBuilder().build();
             Request request = new Request.Builder()
-                    .addHeader("x-api-key", "live_d9U3hV4HL1urhHrtzswTrm89gwp0QTc2gpXaRXWNfG5ABhklfkvdvqsKXMWXuLWc")
+                    .url("https://api.thecatapi.com/v1/favourites")
                     .get()
-                    .url(gato.getUrl())
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("x-api-key", "live_d9U3hV4HL1urhHrtzswTrm89gwp0QTc2gpXaRXWNfG5ABhklfkvdvqsKXMWXuLWc")
                     .build();
             Response response = client.newCall(request).execute();
-            System.out.println(response);
 
+            String json = response.body().string();
+            Gson gson = new Gson();
+            GatoFav[] gatosFavoritos = gson.fromJson(json, GatoFav[].class);
+            System.out.println(gatosFavoritos[3]);
+            System.out.println(gatosFavoritos.length);
+            for (int i = 0; i<gatosFavoritos.length; i++){
+                System.out.println(i);
+                String menu = "Opciones: \n" +
+                        "1.- Ver siguiente favorito\n"+
+                        "2.- Volver\n";
+                String botones [] = {"Siguiente", "Volver"};
+                String idGato = String.valueOf(gatosFavoritos[i].getId());
+                String opcion = (String) JOptionPane.showInputDialog(null, menu, idGato, JOptionPane.INFORMATION_MESSAGE, descargarImagen(gatosFavoritos[i]),botones,botones[0]);
+                System.out.println(gatosFavoritos[i].getImage().getUrl());
+                if (opcion == botones[1]){
+                    break;
+                }
+            }
         }catch(Exception e){
             System.out.println(e);
+        }
+    }
+
+    public static ImageIcon descargarImagen(GatoFav gatitos){
+        Image image = null;
+        try{
+            URL url = new URL(gatitos.image.getUrl());
+            image = ImageIO.read(url);
+            ImageIcon gatoFoto = new ImageIcon(image);
+            if (gatoFoto.getIconWidth() > 800){
+                Image foto = gatoFoto.getImage();
+                Image modificada = foto.getScaledInstance(800,600, Image.SCALE_SMOOTH);
+                gatoFoto = new ImageIcon(modificada);
+            }
+
+            return gatoFoto;
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
