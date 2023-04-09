@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GatoService {
     public static void verGatos() throws IOException {
@@ -93,16 +95,29 @@ public class GatoService {
         }
     }
 
+    public static void separadorJSon(String json){
+
+    }
     private static void verFavoritos(Gatos gato){
         try{
-            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
-                    .addHeader("x-api-key", "live_d9U3hV4HL1urhHrtzswTrm89gwp0QTc2gpXaRXWNfG5ABhklfkvdvqsKXMWXuLWc")
+                    .url("https://api.thecatapi.com/v1/favourites")
                     .get()
-                    .url(gato.getUrl())
+                    .addHeader("x-api-key", "live_d9U3hV4HL1urhHrtzswTrm89gwp0QTc2gpXaRXWNfG5ABhklfkvdvqsKXMWXuLWc")
                     .build();
             Response response = client.newCall(request).execute();
             System.out.println(response);
+            String elJson = response.body().string();
+            elJson = elJson.substring(1,elJson.length());
+            elJson = elJson.substring(0,elJson.length()-1);
+            System.out.println(elJson);
+            Gson gson = new Gson();
+
+
 
         }catch(Exception e){
             System.out.println(e);
