@@ -62,8 +62,8 @@ public class GatoService {
         }
     }
 
-    private static void eliminarFav() {
-
+    private static void eliminarFav(String id) throws IOException {
+        deleteRequest("https://api.thecatapi.com/v1/favourites/"+id);
     }
 
     private static void favoritoGato(Gatos gato) throws IOException {
@@ -76,7 +76,8 @@ public class GatoService {
             Gson gson = new Gson();
             GatoFav[] gatosFavoritos = gson.fromJson(json, GatoFav[].class);
             System.out.println(gatosFavoritos.length);
-            for (int i = 0; i<gatosFavoritos.length; i++){
+            int i = 0;
+            while(i<gatosFavoritos.length){
                 System.out.println(i);
                 String menu = "Opciones: \n" +
                         "1.- Ver siguiente favorito\n"+
@@ -86,10 +87,14 @@ public class GatoService {
                 String opcion = (String) JOptionPane.showInputDialog(null, menu, idGato, JOptionPane.INFORMATION_MESSAGE, descargarImagen(gatosFavoritos[i].image.getUrl()),botones,botones[0]);
                 System.out.println(gatosFavoritos[i].getImage().getUrl());
                 switch (opcion){
+                    case "Siguiente":
+                        i++;
+                        break;
                     case "Eliminar fav":
-                        eliminarFav();
+                        eliminarFav(idGato);
                         break;
                     default:
+                        i = gatosFavoritos.length;
                         break;
                 }
             }
